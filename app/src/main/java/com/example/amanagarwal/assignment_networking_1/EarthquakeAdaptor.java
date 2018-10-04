@@ -23,7 +23,7 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
     private Context context;
     private List<Earthquake> earthquakeList;
 
-    public EarthquakeAdaptor(Context context, List<Earthquake> earthquakeList) {
+    EarthquakeAdaptor(Context context, List<Earthquake> earthquakeList) {
         this.context = context;
         this.earthquakeList = earthquakeList;
     }
@@ -137,7 +137,7 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
 
         TextView magnitudeView, offsetView, placeView, dateView, timeView;
 
-        public EarthquakeViewHolder(@NonNull View itemView) {
+        EarthquakeViewHolder(@NonNull View itemView) {
             super(itemView);
 
             magnitudeView = itemView.findViewById(R.id.magnitude);

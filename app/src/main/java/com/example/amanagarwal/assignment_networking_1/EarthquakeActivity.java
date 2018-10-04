@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +26,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class EarthquakeActivity extends AppCompatActivity implements android.app.LoaderManager.LoaderCallbacks<List<Earthquake>> {
+public class EarthquakeActivity extends AppCompatActivity {
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
-    private static final int EARTHQUAKE_LOADER_ID = 1;
+
+    ArrayList<Earthquake> earthquakeList = new ArrayList<>();
 
     RecyclerView recyclerView;
     EarthquakeAdaptor earthquakeAdaptor;
@@ -48,7 +50,7 @@ public class EarthquakeActivity extends AppCompatActivity implements android.app
 
         // If there is a network connection, fetch data
         if (networkInfo != null && networkInfo.isConnected()) {
-            initLoader();
+            buildQuakes();
         }
         else {
             findViewById(R.id.progressBar).setVisibility(View.GONE);
@@ -56,36 +58,52 @@ public class EarthquakeActivity extends AppCompatActivity implements android.app
         }
     }
 
-    public void initLoader() {
-        Log.e(LOG_TAG, "Loader initiated");
-        getLoaderManager().initLoader(EARTHQUAKE_LOADER_ID, null, this);
-    }
+    void buildQuakes() {
+        Log.e(LOG_TAG, "Building Earthquakes");
 
-    @Override
-    public android.content.Loader<List<Earthquake>> onCreateLoader(int id, Bundle args) {
-        Log.e(LOG_TAG, "onCreateLoader");
-        return new EarthquakeLoader(this);
-    }
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(EarthquakeAPI.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
-    @Override
-    public void onLoadFinished(android.content.Loader<List<Earthquake>> loader, List<Earthquake> data) {
-        Log.e(LOG_TAG, "onLoadFinished");
-        earthquakeAdaptor = new EarthquakeAdaptor(this, data);
+        EarthquakeAPI api = retrofit.create(EarthquakeAPI.class);
 
-        if (data != null && !data.isEmpty()) {
-            Log.e(LOG_TAG, "earthquakeList is neither empty nor null");
-            recyclerView.setAdapter(earthquakeAdaptor);
-            recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        }
-        else {
-            Log.e(LOG_TAG, "earthquakeList is either empty or null");
-        }
+        Call<Quake> call = api.getEarthquakes();
 
-        findViewById(R.id.progressBar).setVisibility(View.GONE);
-    }
+        call.enqueue(new Callback<Quake>() {
+            @Override
+            public void onResponse(Call<Quake> call, Response<Quake> response) {
+                Quake earthquakes = response.body();
 
-    @Override
-    public void onLoaderReset(android.content.Loader<List<Earthquake>> loader) {
-        Log.e(LOG_TAG, "onLoaderReset");
+                List<Quake.Features> features = earthquakes.getFeatures();
+
+                for (Quake.Features feature: features) {
+                    Quake.Features.Properties quake = feature.getProperties();
+                    Earthquake earthquake = new Earthquake(quake.getMag(), quake.getPlace(), quake.getTime(), quake.getUrl());
+                    earthquakeList.add(earthquake);
+                }
+
+                earthquakeAdaptor = new EarthquakeAdaptor(EarthquakeActivity.this, earthquakeList);
+
+                if (earthquakeList != null && !earthquakeList.isEmpty()) {
+                    Log.e(LOG_TAG, "earthquakeList is neither empty nor null");
+                    recyclerView.setAdapter(earthquakeAdaptor);
+                    recyclerView.setLayoutManager(new LinearLayoutManager(EarthquakeActivity.this));
+                }
+                else {
+                    Log.e(LOG_TAG, "earthquakeList is either empty or null");
+                }
+
+                findViewById(R.id.progressBar).setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Call<Quake> call, Throwable t) {
+                findViewById(R.id.progressBar).setVisibility(View.GONE);
+                emptyView.setText("Error fetching Earthquakes");
+            }
+        });
+
+        Log.e(LOG_TAG, "Done Building Earthquakes");
     }
 }
