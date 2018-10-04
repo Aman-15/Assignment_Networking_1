@@ -24,11 +24,29 @@ public class Earthquake {
 
     public int getId() { return id; }
 
+    public Earthquake(double magnitude, String place, long time, String url) {
+        this.magnitude = magnitude;
+        this.place = place;
+        this.time = time;
+        this.url = url;
+    }
+
     public Earthquake(int id, double magnitude, String place, long time, String url) {
         this.id = id;
         this.magnitude = magnitude;
         this.place = place;
         this.time = time;
         this.url = url;
+    }
+
+    @Override
+    public String toString() {
+        return "Earthquake{" +
+                "id=" + id +
+                ", magnitude=" + magnitude +
+                ", place='" + place + '\'' +
+                ", time=" + time +
+                ", url='" + url + '\'' +
+                '}';
     }
 }
