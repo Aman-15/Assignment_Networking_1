@@ -3,6 +3,7 @@ package com.example.amanagarwal.assignment_networking_1;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -34,9 +35,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class EarthquakeActivity extends AppCompatActivity {
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
 
-    RecyclerView recyclerView;
-    TextView emptyView;
-    EarthquakeAdaptor adaptor;
+    private RecyclerView recyclerView;
+    private TextView emptyView;
+    private EarthquakeAdaptor adaptor;
+    private SwipeRefreshLayout pullToRefresh;
 
     private Realm mRealm;
 
@@ -59,16 +61,19 @@ public class EarthquakeActivity extends AppCompatActivity {
 
         adaptor = new EarthquakeAdaptor(null, false, this);
 
-        final SwipeRefreshLayout pullToRefresh = findViewById(R.id.pullToRefresh);
+        pullToRefresh = findViewById(R.id.pullToRefresh);
         pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 Log.e(LOG_TAG, "Refreshing");
-                recyclerView.getRecycledViewPool().clear();
-                adaptor.notifyDataSetChanged();
                 deleteData();
                 buildQuakes();
-                pullToRefresh.setRefreshing(false);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        pullToRefresh.setRefreshing(false);
+                    }
+                }, 1000);
             }
 
             void deleteData() {
@@ -81,12 +86,19 @@ public class EarthquakeActivity extends AppCompatActivity {
             }
         });
 
+        pullToRefresh.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_red_light);
+
         // If there is a network connection, fetch data
         if (networkInfo != null && networkInfo.isConnected()) {
+
+            // Cache is Empty
             if (realmResults == null || realmResults.isEmpty()) {
                 Log.e(LOG_TAG, "No earthquakes were found");
                 buildQuakes();
             }
+
+            // Cache
             else {
                 Log.e(LOG_TAG, "Earthquakes found, using cached data");
                 adaptor.setData(realmResults);
