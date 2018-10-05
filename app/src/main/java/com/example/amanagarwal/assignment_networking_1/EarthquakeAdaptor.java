@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,14 +19,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.EarthquakeViewHolder> {
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmRecyclerViewAdapter;
+import io.realm.RealmResults;
+import models.EarthquakeData;
+
+public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, EarthquakeAdaptor.EarthquakeViewHolder> {
 
     private Context context;
-    private List<Earthquake> earthquakeList;
+    OrderedRealmCollection<EarthquakeData> data;
 
-    EarthquakeAdaptor(Context context, List<Earthquake> earthquakeList) {
+    EarthquakeAdaptor(@Nullable OrderedRealmCollection<EarthquakeData> data, boolean autoUpdate, Context context) {
+        super(data, autoUpdate);
         this.context = context;
-        this.earthquakeList = earthquakeList;
+        this.data = data;
     }
 
     @NonNull
@@ -36,19 +43,23 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
         return new EarthquakeViewHolder(view);
     }
 
+    public void setData(OrderedRealmCollection<EarthquakeData> data) {
+        this.data = data;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull EarthquakeViewHolder earthquakeViewHolder, int i) {
-        Earthquake currentEarthquake = earthquakeList.get(i);
+        EarthquakeData earthquakeData = data.get(i);
 
-        earthquakeViewHolder.magnitudeView.setText(formatMagnitude(currentEarthquake.getMagnitude()));
+        earthquakeViewHolder.magnitudeView.setText(formatMagnitude(earthquakeData.getMagnitude()));
 
-        String[] location = getOffsetAndPlace(currentEarthquake.getPlace());
+        String[] location = getOffsetAndPlace(earthquakeData.getPlace());
 
         earthquakeViewHolder.offsetView.setText(location[0]);
 
         earthquakeViewHolder.placeView.setText(location[1]);
 
-        Date dateObject = new Date(currentEarthquake.getTime());
+        Date dateObject = new Date(earthquakeData.getTime());
         String formattedDate = formatDate(dateObject);
         earthquakeViewHolder.dateView.setText(formattedDate);
 
@@ -56,7 +67,7 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
         earthquakeViewHolder.timeView.setText(formattedTime);
 
         GradientDrawable magnitudeCircle = (GradientDrawable)earthquakeViewHolder.magnitudeView.getBackground();
-        magnitudeCircle.setColor(getMagnitudeColor(currentEarthquake.getMagnitude()));
+        magnitudeCircle.setColor(getMagnitudeColor(earthquakeData.getMagnitude()));
     }
 
     private String[] getOffsetAndPlace(String location) {
@@ -129,9 +140,7 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
 
 
     @Override
-    public int getItemCount() {
-        return earthquakeList.size();
-    }
+    public int getItemCount() { return data.size(); }
 
     public class EarthquakeViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -151,7 +160,7 @@ public class EarthquakeAdaptor extends RecyclerView.Adapter<EarthquakeAdaptor.Ea
 
         @Override
         public void onClick(View v) {
-            Earthquake currentEarthquake = earthquakeList.get(getAdapterPosition());
+            EarthquakeData currentEarthquake = data.get(getAdapterPosition());
 
             Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
 
