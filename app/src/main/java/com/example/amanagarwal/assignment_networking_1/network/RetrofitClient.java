@@ -1,17 +1,10 @@
 package com.example.amanagarwal.assignment_networking_1.network;
 
-import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
-import android.view.View;
-
-import com.example.amanagarwal.assignment_networking_1.R;
-import com.example.amanagarwal.assignment_networking_1.activities.EarthquakeActivity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
 import models.EarthquakeData;
 import models.Quake;
 import retrofit2.Call;
@@ -38,7 +31,9 @@ public class RetrofitClient {
     public static void buildQuakes(final EarthquakeDataListener earthquakeDataListener) {
         Log.e(LOG_TAG, "Building Earthquakes");
 
-        retrofit = getClient();
+        if (retrofit == null)
+            retrofit = getClient();
+
         EarthquakeAPI api = retrofit.create(EarthquakeAPI.class);
 
         Call<Quake> call = api.getEarthquakes();

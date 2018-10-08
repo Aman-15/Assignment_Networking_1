@@ -100,12 +100,12 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
 
     @Override
     public void onDataFetch(List<EarthquakeData> earthquakeDataList) {
-//        mRealm.executeTransaction(new Realm.Transaction() {
-//            @Override
-//            public void execute(Realm realm) {
-//                realm.deleteAll();
-//            }
-//        });
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.deleteAll();
+            }
+        });
         //delete
         insertEarthquakeData(earthquakeDataList);
 

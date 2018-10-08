@@ -16,10 +16,7 @@ import android.widget.TextView;
 import com.example.amanagarwal.assignment_networking_1.R;
 import com.example.amanagarwal.assignment_networking_1.util.TextUtil;
 
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.RealmRecyclerViewAdapter;
@@ -28,7 +25,7 @@ import models.EarthquakeData;
 public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, EarthquakeAdaptor.EarthquakeViewHolder> {
 
     private Context context;
-    OrderedRealmCollection<EarthquakeData> data;
+    private OrderedRealmCollection<EarthquakeData> data;
 
     public EarthquakeAdaptor(@Nullable OrderedRealmCollection<EarthquakeData> data, boolean autoUpdate, Context context) {
         super(data, autoUpdate);
@@ -91,7 +88,6 @@ public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, 
             EarthquakeData currentEarthquake = data.get(getAdapterPosition());
 
             Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
-
             Intent websiteIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
             context.startActivity(websiteIntent);
         }
