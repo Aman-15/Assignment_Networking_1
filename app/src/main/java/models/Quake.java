@@ -1,6 +1,4 @@
-package com.example.amanagarwal.assignment_networking_1;
-
-import android.widget.ArrayAdapter;
+package models;
 
 import java.util.ArrayList;
 
