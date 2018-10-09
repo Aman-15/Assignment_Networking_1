@@ -6,8 +6,14 @@ import com.example.amanagarwal.assignment_networking_1.R;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+
+import models.Feature;
+import models.Properties;
+import models.Quake2;
 
 public class TextUtil {
 
@@ -77,5 +83,15 @@ public class TextUtil {
                 break;
         }
         return magnitudeColorResourceId;
+    }
+
+    public static List<Properties> buildList(Quake2 quake2) {
+        List<Properties> properties = new ArrayList<>();
+        List<Feature> features = quake2.getFeatures();
+
+        for (Feature feature: features)
+            properties.add(feature.getProperties());
+
+        return properties;
     }
 }

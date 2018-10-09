@@ -14,12 +14,14 @@ import com.example.amanagarwal.assignment_networking_1.R;
 import com.example.amanagarwal.assignment_networking_1.network.EarthquakeDataListener;
 import com.example.amanagarwal.assignment_networking_1.network.NetworkInformation;
 import com.example.amanagarwal.assignment_networking_1.network.RetrofitClient;
+import com.example.amanagarwal.assignment_networking_1.util.TextUtil;
 
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import models.EarthquakeData;
+import models.Properties;
+import models.Quake2;
 
 public class EarthquakeActivity extends AppCompatActivity implements EarthquakeDataListener {
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
@@ -43,7 +45,7 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
 
         Realm.init(this);
         mRealm = Realm.getDefaultInstance();
-        RealmResults<EarthquakeData> realmResults = mRealm.where(EarthquakeData.class).findAll();
+        RealmResults<Properties> realmResults = mRealm.where(Properties.class).findAll();
 
         adaptor = new EarthquakeAdaptor(null, false, this);
 
@@ -65,9 +67,11 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
 
                 Log.e(LOG_TAG, "earthquakeList is neither empty nor null");
                 recyclerView.setAdapter(adaptor);
-                recyclerView.setLayoutManager(new LinearLayoutManager(EarthquakeActivity.this));
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
             }
         }
+
+        // Network Error
         else {
             findViewById(R.id.progressBar).setVisibility(View.GONE);
             emptyView.setText("NO INTERNET!");
@@ -80,7 +84,12 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
             @Override
             public void onRefresh() {
                 Log.e(LOG_TAG, "Refreshing");
-//                deleteData();
+                mRealm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        realm.deleteAll();
+                    }
+                });
                 pullToRefresh.setRefreshing(true);
                 RetrofitClient.buildQuakes(EarthquakeActivity.this);
                 pullToRefresh.setRefreshing(false);
@@ -94,29 +103,25 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
 
     @Override
     public void onFailure() {
+        findViewById(R.id.recycler).setVisibility(View.GONE);
         findViewById(R.id.progressBar).setVisibility(View.GONE);
         emptyView.setText("Error fetching Earthquakes");
     }
 
     @Override
-    public void onDataFetch(List<EarthquakeData> earthquakeDataList) {
-        mRealm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.deleteAll();
-            }
-        });
-        //delete
-        insertEarthquakeData(earthquakeDataList);
+    public void onDataFetch(Quake2 quake2) {
+        Log.e(LOG_TAG, "onDataFetch");
 
-        RealmResults<EarthquakeData> realmResults = mRealm.where(EarthquakeData.class).findAll();
+        insertEarthquakeData(quake2);
+
+        RealmResults<Properties> realmResults = mRealm.where(Properties.class).findAll();
 
         adaptor.setData(realmResults);
 
         if (realmResults != null && !realmResults.isEmpty()) {
             Log.e(LOG_TAG, "earthquakeList is neither empty nor null");
             recyclerView.setAdapter(adaptor);
-            recyclerView.setLayoutManager(new LinearLayoutManager(EarthquakeActivity.this));
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
         }
         else {
             Log.e(LOG_TAG, "earthquakeList is either empty or null");
@@ -125,9 +130,12 @@ public class EarthquakeActivity extends AppCompatActivity implements EarthquakeD
         findViewById(R.id.progressBar).setVisibility(View.GONE);
     }
 
-    void insertEarthquakeData(final List<EarthquakeData> earthquakeDataList) {
+    void insertEarthquakeData(Quake2 quake2) {
+
+        List<Properties> properties = TextUtil.buildList(quake2);
+
         mRealm.beginTransaction();
-        mRealm.copyToRealmOrUpdate(earthquakeDataList);
+        mRealm.copyToRealmOrUpdate(properties);
         mRealm.commitTransaction();
     }
 }

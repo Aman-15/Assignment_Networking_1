@@ -1,10 +1,8 @@
 package com.example.amanagarwal.assignment_networking_1.network;
 
-import java.util.List;
-
-import models.EarthquakeData;
+import models.Quake2;
 
 public interface EarthquakeDataListener {
     void onFailure();
-    void onDataFetch(List<EarthquakeData> earthquakeDataList);
+    void onDataFetch(Quake2 quake2);
 }

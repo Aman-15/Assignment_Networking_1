@@ -2,11 +2,7 @@ package com.example.amanagarwal.assignment_networking_1.network;
 
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import models.EarthquakeData;
-import models.Quake;
+import models.Quake2;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,31 +32,18 @@ public class RetrofitClient {
 
         EarthquakeAPI api = retrofit.create(EarthquakeAPI.class);
 
-        Call<Quake> call = api.getEarthquakes();
+        Call<Quake2> call = api.getEarthquakes();
 
-        call.enqueue(new Callback<Quake>() {
+        call.enqueue(new Callback<Quake2>() {
             @Override
-            public void onResponse(Call<Quake> call, Response<Quake> response) {
-                Quake earthquakes = response.body();
-
-                List<Quake.Features> features = earthquakes.getFeatures();
-                List<EarthquakeData> earthquakeDataList = new ArrayList<>();
-
-                for (Quake.Features feature: features) {
-                    Quake.Features.Properties quake = feature.getProperties();
-                    EarthquakeData data = new EarthquakeData();
-                    data.setMagnitude(quake.getMag());
-                    data.setPlace(quake.getPlace());
-                    data.setTime(quake.getTime());
-                    data.setUrl(quake.getUrl());
-                    earthquakeDataList.add(data);
-                }
-
-                earthquakeDataListener.onDataFetch(earthquakeDataList);
+            public void onResponse(Call<Quake2> call, Response<Quake2> response) {
+                Quake2 quake2 = response.body();
+                earthquakeDataListener.onDataFetch(quake2);
             }
 
             @Override
-            public void onFailure(Call<Quake> call, Throwable t) {
+            public void onFailure(Call<Quake2> call, Throwable t) {
+                Log.e(LOG_TAG, t.toString());
                 earthquakeDataListener.onFailure();
             }
         });

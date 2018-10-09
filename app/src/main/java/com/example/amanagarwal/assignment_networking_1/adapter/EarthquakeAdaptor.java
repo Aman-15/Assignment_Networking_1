@@ -20,14 +20,14 @@ import java.util.Date;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.RealmRecyclerViewAdapter;
-import models.EarthquakeData;
+import models.Properties;
 
-public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, EarthquakeAdaptor.EarthquakeViewHolder> {
+public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<Properties, EarthquakeAdaptor.EarthquakeViewHolder> {
 
     private Context context;
-    private OrderedRealmCollection<EarthquakeData> data;
+    private OrderedRealmCollection<Properties> data;
 
-    public EarthquakeAdaptor(@Nullable OrderedRealmCollection<EarthquakeData> data, boolean autoUpdate, Context context) {
+    public EarthquakeAdaptor(@Nullable OrderedRealmCollection<Properties> data, boolean autoUpdate, Context context) {
         super(data, autoUpdate);
         this.context = context;
         this.data = data;
@@ -41,28 +41,27 @@ public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, 
         return new EarthquakeViewHolder(view);
     }
 
-    public void setData(OrderedRealmCollection<EarthquakeData> data) {
+    public void setData(OrderedRealmCollection<Properties> data) {
         this.data = data;
     }
 
     @Override
     public void onBindViewHolder(@NonNull EarthquakeViewHolder earthquakeViewHolder, int i) {
-        EarthquakeData earthquakeData = data.get(i);
-        String[] location = TextUtil.getOffsetAndPlace(earthquakeData.getPlace());
-        Date dateObject = new Date(earthquakeData.getTime());
+        Properties properties = data.get(i);
+        String[] location = TextUtil.getOffsetAndPlace(properties.getPlace());
+        Date dateObject = new Date(properties.getTime());
         String formattedDate = TextUtil.formatDate(dateObject);
         String formattedTime = TextUtil.formatTime(dateObject);
         GradientDrawable magnitudeCircle = (GradientDrawable)earthquakeViewHolder.magnitudeView.getBackground();
-        int magnitudeColorId = TextUtil.getMagnitudeColor(earthquakeData.getMagnitude());
+        int magnitudeColorId = TextUtil.getMagnitudeColor(properties.getMagnitude());
 
-        earthquakeViewHolder.magnitudeView.setText(TextUtil.formatMagnitude(earthquakeData.getMagnitude()));
+        earthquakeViewHolder.magnitudeView.setText(TextUtil.formatMagnitude(properties.getMagnitude()));
         earthquakeViewHolder.offsetView.setText(location[0]);
         earthquakeViewHolder.placeView.setText(location[1]);
         earthquakeViewHolder.dateView.setText(formattedDate);
         earthquakeViewHolder.timeView.setText(formattedTime);
         magnitudeCircle.setColor(ContextCompat.getColor(context, magnitudeColorId));
     }
-
 
     @Override
     public int getItemCount() { return data.size(); }
@@ -85,9 +84,9 @@ public class EarthquakeAdaptor extends RealmRecyclerViewAdapter<EarthquakeData, 
 
         @Override
         public void onClick(View v) {
-            EarthquakeData currentEarthquake = data.get(getAdapterPosition());
+            Properties properties = data.get(getAdapterPosition());
 
-            Uri earthquakeUri = Uri.parse(currentEarthquake.getUrl());
+            Uri earthquakeUri = Uri.parse(properties.getUrl());
             Intent websiteIntent = new Intent(Intent.ACTION_VIEW, earthquakeUri);
             context.startActivity(websiteIntent);
         }
